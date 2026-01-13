@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Users</title>
+  <link rel="stylesheet" href="viewUser.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="back-link">← Add New User</a>
+  <h2>👥 User Directory</h2>
+  <div id="users"></div>
+</div>
+
+<script>
+$.get("https://cloud-user-service.onrender.com/api/users", function(data){
+  if (!data || data.length === 0) {
+    $("#users").html(`
+      <div class="empty-state">
+        <h3>No Users Found</h3>
+        <p>Start by adding a new user</p>
+      </div>
+    `);
+    return;
+  }
+
+  data.forEach(user => {
+    const initials = (user.firstName?.charAt(0) || "U") + (user.lastName?.charAt(0) || "");
+    const createdDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A";
+    
+    $("#users").append(`
+      <div class="user-card">
+        <div class="user-header">
+          <div class="user-avatar">${initials.toUpperCase()}</div>
+          <div class="user-name">${user.firstName || ""} ${user.lastName || ""}</div>
+        </div>
+        
+        <div class="user-info">
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value">${user.email || "N/A"}</span>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-label">Mobile</span>
+            <span class="info-value">${user.mobile || "N/A"}</span>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-label">Login ID</span>
+            <span class="info-value">${user.loginId || "N/A"}</span>
+          </div>
+
+          ${user.address ? `
+          <div class="address-info">
+            <p><strong>📍 Address:</strong></p>
+            <p>${user.address.street || ""} ${user.address.street ? "<br>" : ""}</p>
+            <p>${user.address.city || ""}, ${user.address.state || ""}, ${user.address.country || ""}</p>
+          </div>
+          ` : ""}
+        </div>
+
+        <div class="timestamp">Added: ${createdDate}</div>
+      </div>
+    `);
+  });
+});
+</script>
+
+</body>
+</html>

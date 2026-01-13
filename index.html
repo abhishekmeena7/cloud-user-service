@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add User</title>
+    <link rel="stylesheet" href="addingUser.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  </head>
+  <body>
+    <div class="form-container">
+      <a href="viewUser.html" class="view-link">View All Users →</a>
+      <h2>Add New User</h2>
+
+      <form id="userForm">
+        <div class="form-group">
+          <label for="fname">First Name</label>
+          <input id="fname" type="text" placeholder="Enter first name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="lname">Last Name</label>
+          <input id="lname" type="text" placeholder="Enter last name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="mobile">Mobile Number</label>
+          <input
+            id="mobile"
+            type="text"
+            placeholder="Enter 10-digit mobile number"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email ID</label>
+          <input id="email" type="email" placeholder="Enter valid email" required />
+        </div>
+
+        <div class="address-section">
+          <h3>Address Details</h3>
+          <div class="address-grid">
+            <div class="form-group">
+              <label for="street">Street</label>
+              <input id="street" type="text" placeholder="Street" required />
+            </div>
+
+            <div class="form-group">
+              <label for="city">City</label>
+              <input id="city" type="text" placeholder="City" required />
+            </div>
+
+            <div class="form-group">
+              <label for="state">State</label>
+              <input id="state" type="text" placeholder="State" required />
+            </div>
+
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input id="country" type="text" placeholder="Country" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="loginId">Login ID</label>
+          <input
+            id="loginId"
+            type="text"
+            placeholder="8 alphanumeric characters"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <input
+              id="password"
+              type="password"
+              placeholder="Min 6 chars, 1 upper, 1 lower, 1 special"
+              required
+            />
+            <button type="button" class="toggle-password" onclick="togglePassword()">
+              <span id="eye-icon">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="button-container">
+          <button type="button" onclick="saveUser()">Save User</button>
+          <button type="button" class="reset-btn" onclick="resetForm()">
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      function resetForm() {
+        $("#userForm")[0].reset();
+        $("#password").attr("type", "password");
+        $("#eye-icon").text("👁️");
+      }
+
+      function togglePassword() {
+        const passwordInput = $("#password");
+        const eyeIcon = $("#eye-icon");
+        
+        if (passwordInput.attr("type") === "password") {
+          passwordInput.attr("type", "text");
+          eyeIcon.text("🙈");
+        } else {
+          passwordInput.attr("type", "password");
+          eyeIcon.text("👁️");
+        }
+      }
+
+      function saveUser() {
+        const fname = $("#fname").val().trim();
+        const lname = $("#lname").val().trim();
+        const mobile = $("#mobile").val().trim();
+        const email = $("#email").val().trim();
+        const street = $("#street").val().trim();
+        const city = $("#city").val().trim();
+        const state = $("#state").val().trim();
+        const country = $("#country").val().trim();
+        const loginId = $("#loginId").val().trim();
+        const password = $("#password").val().trim();
+
+
+        if (!fname || !lname || !mobile || !email || !street || !city || !state || !country || !loginId || !password) {
+          return alert("❌ All fields are required! Please fill in all details including address.");
+        }
+
+        const fnameOk = /^[A-Za-z]{2,}$/.test(fname);
+        const lnameOk = /^[A-Za-z]{2,}$/.test(lname);
+        const mobileOk = /^[0-9]{10}$/.test(mobile);
+        const emailOk = /^\S+@\S+\.\S+$/.test(email);
+        const loginOk = /^[A-Za-z0-9]{8}$/.test(loginId);
+        const passOk = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{6,}$/.test(password);
+
+        if (!fnameOk) {
+          return alert("❌ First name must contain only letters (min 2 characters).");
+        }
+
+        if (!lnameOk) {
+          return alert("❌ Last name must contain only letters (min 2 characters).");
+        }
+
+        if (!mobileOk) {
+          return alert("❌ Mobile must be exactly 10 digits.");
+        }
+
+        if (!emailOk) {
+          return alert("❌ Enter a valid email address.");
+        }
+
+        if (!loginOk) {
+          return alert("❌ Login ID must be exactly 8 alphanumeric characters.");
+        }
+
+        if (!passOk) {
+          return alert(
+            "❌ Password must be 6+ chars with uppercase, lowercase, and special character."
+          );
+        }
+
+        $.ajax({
+          url: "https://cloud-user-service.onrender.com/api/users",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({
+            firstName: fname,
+            lastName: lname,
+            mobile,
+            email,
+            address: {
+              street,
+              city,
+              state,
+              country,
+            },
+            loginId,
+            password,
+          }),
+          success: function () {
+            alert("✅ User Saved Successfully!");
+            $("#userForm")[0].reset();
+          },
+          error: function (xhr) {
+            alert(xhr.responseJSON?.error || "❌ Failed to save user");
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
